@@ -10,10 +10,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		README.md = README.md
+		Smart.Data.nuspec = Smart.Data.nuspec
 		Smart.Data.ruleset = Smart.Data.ruleset
 		Smart.Data.sln.DotSettings = Smart.Data.sln.DotSettings
-		Smart.Mock.Data.nuspec = Smart.Mock.Data.nuspec
+		Smart.Data.SqlClient.nuspec = Smart.Data.SqlClient.nuspec
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smart.Data.SqlClient", "Smart.Data.SqlClient\Smart.Data.SqlClient.csproj", "{89B5B593-9251-4C03-A046-3F7001F2474B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +28,10 @@ Global
 		{646F5164-98AF-4F20-876B-F7147272C8AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{646F5164-98AF-4F20-876B-F7147272C8AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{646F5164-98AF-4F20-876B-F7147272C8AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89B5B593-9251-4C03-A046-3F7001F2474B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89B5B593-9251-4C03-A046-3F7001F2474B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89B5B593-9251-4C03-A046-3F7001F2474B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89B5B593-9251-4C03-A046-3F7001F2474B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
