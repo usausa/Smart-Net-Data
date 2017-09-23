@@ -3,13 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox.Data.Builder", "Sandbox.Data.Builder\Sandbox.Data.Builder.csproj", "{87481988-F68D-4F17-9600-25B298FB779F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox.Data.Builder", "Sandbox.Data.Builder\Sandbox.Data.Builder.csproj", "{87481988-F68D-4F17-9600-25B298FB779F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox.Data.Builder.Tests", "Sandbox.Data.Builder.Tests\Sandbox.Data.Builder.Tests.csproj", "{0F649DE5-7075-4545-85BB-7A9B122F7C33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox.Data.Builder.Tests", "Sandbox.Data.Builder.Tests\Sandbox.Data.Builder.Tests.csproj", "{0F649DE5-7075-4545-85BB-7A9B122F7C33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox.Client", "Sandbox.Client\Sandbox.Client.csproj", "{CBF51F44-5C00-434E-B872-AD0A40887C7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox.Client", "Sandbox.Client\Sandbox.Client.csproj", "{CBF51F44-5C00-434E-B872-AD0A40887C7D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox.Data.Builder.CodeGenerator", "Sandbox.Data.Builder.CodeGenerator\Sandbox.Data.Builder.CodeGenerator.csproj", "{26CC1B03-939F-403F-9A84-1FCD7D740585}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smart.Data", "..\Smart.Data\Smart.Data.csproj", "{9A8BA458-C5A8-4C31-A3C7-F3E23B2BB613}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smart.Data.SqlClient", "..\Smart.Data.SqlClient\Smart.Data.SqlClient.csproj", "{86451D2F-0A3D-4D47-BFBA-3C0F3DD34EF0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Smart", "Smart", "{949E591C-FC1A-4B72-8C80-3D1021962AE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +39,21 @@ Global
 		{26CC1B03-939F-403F-9A84-1FCD7D740585}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26CC1B03-939F-403F-9A84-1FCD7D740585}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26CC1B03-939F-403F-9A84-1FCD7D740585}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A8BA458-C5A8-4C31-A3C7-F3E23B2BB613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A8BA458-C5A8-4C31-A3C7-F3E23B2BB613}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A8BA458-C5A8-4C31-A3C7-F3E23B2BB613}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A8BA458-C5A8-4C31-A3C7-F3E23B2BB613}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86451D2F-0A3D-4D47-BFBA-3C0F3DD34EF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86451D2F-0A3D-4D47-BFBA-3C0F3DD34EF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86451D2F-0A3D-4D47-BFBA-3C0F3DD34EF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86451D2F-0A3D-4D47-BFBA-3C0F3DD34EF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9A8BA458-C5A8-4C31-A3C7-F3E23B2BB613} = {949E591C-FC1A-4B72-8C80-3D1021962AE6}
+		{86451D2F-0A3D-4D47-BFBA-3C0F3DD34EF0} = {949E591C-FC1A-4B72-8C80-3D1021962AE6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9EE90D22-2D4A-4F01-A663-7B0E4EF8665E}
