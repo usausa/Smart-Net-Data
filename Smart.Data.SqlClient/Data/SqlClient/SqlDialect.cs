@@ -7,7 +7,7 @@
     /// <summary>
     ///
     /// </summary>
-    public class SqlDialect : IDialect
+    public sealed class SqlDialect : IDialect
     {
         /// <summary>
         ///

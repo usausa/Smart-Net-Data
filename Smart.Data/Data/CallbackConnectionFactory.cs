@@ -6,7 +6,7 @@
     /// <summary>
     ///
     /// </summary>
-    public class CallbackConnectionFactory : IConnectionFactory
+    public sealed class CallbackConnectionFactory : IConnectionFactory
     {
         private readonly Func<IDbConnection> factory;
 
