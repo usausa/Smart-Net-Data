@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <CodeAnalysisRuleSet>..\Smart.Data.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>Smart</RootNamespace>
@@ -20,6 +20,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="1.1.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
   </ItemGroup>
 
