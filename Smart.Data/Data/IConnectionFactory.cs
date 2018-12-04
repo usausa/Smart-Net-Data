@@ -150,5 +150,44 @@
                 }
             }
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="factory"></param>
+        /// <param name="level"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task UsingTxAsync(this IConnectionFactory factory, IsolationLevel level, Func<IDbConnection, IDbTransaction, Task> func)
+        {
+            using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                using (var tx = con.BeginTransaction(level))
+                {
+                    await func(con, tx);
+                }
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="factory"></param>
+        /// <param name="level"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public static async Task<T> UsingTxAsync<T>(this IConnectionFactory factory, IsolationLevel level, Func<IDbConnection, IDbTransaction, Task<T>> func)
+        {
+            using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                using (var tx = con.BeginTransaction(level))
+                {
+                    return await func(con, tx);
+                }
+            }
+        }
     }
 }
