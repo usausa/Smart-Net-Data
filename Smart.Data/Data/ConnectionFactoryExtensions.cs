@@ -29,7 +29,7 @@
             using (var con = factory.CreateConnection())
             {
                 con.Open();
-                await func(con);
+                await func(con).ConfigureAwait(false);
             }
         }
 
@@ -38,7 +38,7 @@
             using (var con = factory.CreateConnection())
             {
                 con.Open();
-                return await func(con);
+                return await func(con).ConfigureAwait(false);
             }
         }
 
@@ -73,7 +73,7 @@
                 con.Open();
                 using (var tx = con.BeginTransaction())
                 {
-                    await func(con, tx);
+                    await func(con, tx).ConfigureAwait(false);
                 }
             }
         }
@@ -85,7 +85,7 @@
                 con.Open();
                 using (var tx = con.BeginTransaction())
                 {
-                    return await func(con, tx);
+                    return await func(con, tx).ConfigureAwait(false);
                 }
             }
         }
@@ -97,7 +97,7 @@
                 con.Open();
                 using (var tx = con.BeginTransaction(level))
                 {
-                    await func(con, tx);
+                    await func(con, tx).ConfigureAwait(false);
                 }
             }
         }
@@ -109,7 +109,7 @@
                 con.Open();
                 using (var tx = con.BeginTransaction(level))
                 {
-                    return await func(con, tx);
+                    return await func(con, tx).ConfigureAwait(false);
                 }
             }
         }
