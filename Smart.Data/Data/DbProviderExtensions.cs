@@ -1,12 +1,13 @@
-﻿namespace Smart.Data
+namespace Smart.Data
 {
     using System;
     using System.Data;
+    using System.Data.Common;
     using System.Threading.Tasks;
 
-    public static class ConnectionFactoryExtensions
+    public static class DbProviderExtensions
     {
-        public static void Using(this IConnectionFactory factory, Action<IDbConnection> action)
+        public static void Using(this IDbProvider factory, Action<DbConnection> action)
         {
             using (var con = factory.CreateConnection())
             {
@@ -15,7 +16,7 @@
             }
         }
 
-        public static T Using<T>(this IConnectionFactory factory, Func<IDbConnection, T> func)
+        public static T Using<T>(this IDbProvider factory, Func<DbConnection, T> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -24,7 +25,7 @@
             }
         }
 
-        public static async Task UsingAsync(this IConnectionFactory factory, Func<IDbConnection, Task> func)
+        public static async Task UsingAsync(this IDbProvider factory, Func<DbConnection, Task> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -33,7 +34,7 @@
             }
         }
 
-        public static async Task<T> UsingAsync<T>(this IConnectionFactory factory, Func<IDbConnection, Task<T>> func)
+        public static async Task<T> UsingAsync<T>(this IDbProvider factory, Func<DbConnection, Task<T>> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -42,7 +43,7 @@
             }
         }
 
-        public static void UsingTx(this IConnectionFactory factory, Action<IDbConnection, IDbTransaction> action)
+        public static void UsingTx(this IDbProvider factory, Action<DbConnection, IDbTransaction> action)
         {
             using (var con = factory.CreateConnection())
             {
@@ -54,7 +55,7 @@
             }
         }
 
-        public static T UsingTx<T>(this IConnectionFactory factory, Func<IDbConnection, IDbTransaction, T> func)
+        public static T UsingTx<T>(this IDbProvider factory, Func<DbConnection, IDbTransaction, T> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -66,7 +67,7 @@
             }
         }
 
-        public static async Task UsingTxAsync(this IConnectionFactory factory, Func<IDbConnection, IDbTransaction, Task> func)
+        public static async Task UsingTxAsync(this IDbProvider factory, Func<DbConnection, IDbTransaction, Task> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -78,7 +79,7 @@
             }
         }
 
-        public static async Task<T> UsingTxAsync<T>(this IConnectionFactory factory, Func<IDbConnection, IDbTransaction, Task<T>> func)
+        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, Func<DbConnection, IDbTransaction, Task<T>> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -90,7 +91,7 @@
             }
         }
 
-        public static async Task UsingTxAsync(this IConnectionFactory factory, IsolationLevel level, Func<IDbConnection, IDbTransaction, Task> func)
+        public static async Task UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, IDbTransaction, Task> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -102,7 +103,7 @@
             }
         }
 
-        public static async Task<T> UsingTxAsync<T>(this IConnectionFactory factory, IsolationLevel level, Func<IDbConnection, IDbTransaction, Task<T>> func)
+        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, IDbTransaction, Task<T>> func)
         {
             using (var con = factory.CreateConnection())
             {
