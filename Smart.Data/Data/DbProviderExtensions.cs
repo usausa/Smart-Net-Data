@@ -43,7 +43,7 @@ namespace Smart.Data
             }
         }
 
-        public static void UsingTx(this IDbProvider factory, Action<DbConnection, IDbTransaction> action)
+        public static void UsingTx(this IDbProvider factory, Action<DbConnection, DbTransaction> action)
         {
             using (var con = factory.CreateConnection())
             {
@@ -55,7 +55,7 @@ namespace Smart.Data
             }
         }
 
-        public static T UsingTx<T>(this IDbProvider factory, Func<DbConnection, IDbTransaction, T> func)
+        public static T UsingTx<T>(this IDbProvider factory, Func<DbConnection, DbTransaction, T> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -67,7 +67,7 @@ namespace Smart.Data
             }
         }
 
-        public static async Task UsingTxAsync(this IDbProvider factory, Func<DbConnection, IDbTransaction, Task> func)
+        public static async Task UsingTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, Task> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -79,7 +79,7 @@ namespace Smart.Data
             }
         }
 
-        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, Func<DbConnection, IDbTransaction, Task<T>> func)
+        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, Func<DbConnection, DbTransaction, Task<T>> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -91,7 +91,7 @@ namespace Smart.Data
             }
         }
 
-        public static async Task UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, IDbTransaction, Task> func)
+        public static async Task UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, Task> func)
         {
             using (var con = factory.CreateConnection())
             {
@@ -103,7 +103,7 @@ namespace Smart.Data
             }
         }
 
-        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, IDbTransaction, Task<T>> func)
+        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, Task<T>> func)
         {
             using (var con = factory.CreateConnection())
             {
