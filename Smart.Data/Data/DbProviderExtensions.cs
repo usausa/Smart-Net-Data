@@ -1,12 +1,22 @@
 namespace Smart.Data
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using System.Threading.Tasks;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Justification = "Extensions")]
     public static class DbProviderExtensions
     {
+        private static IEnumerable<T> ToDefer<T>(IEnumerable<T> enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                yield return item;
+            }
+        }
+
         public static void Using(this IDbProvider factory, Action<DbConnection> action)
         {
             using (var con = factory.CreateConnection())
@@ -25,6 +35,15 @@ namespace Smart.Data
             }
         }
 
+        public static IEnumerable<T> UsingDefer<T>(this IDbProvider factory, Func<DbConnection, IEnumerable<T>> func)
+        {
+            using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                return ToDefer(func(con));
+            }
+        }
+
         public static async Task UsingAsync(this IDbProvider factory, Func<DbConnection, Task> func)
         {
             using (var con = factory.CreateConnection())
@@ -40,6 +59,15 @@ namespace Smart.Data
             {
                 con.Open();
                 return await func(con).ConfigureAwait(false);
+            }
+        }
+
+        public static async Task<IEnumerable<T>> UsingDeferAsync<T>(this IDbProvider factory, Func<DbConnection, Task<IEnumerable<T>>> func)
+        {
+            using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                return ToDefer(await func(con).ConfigureAwait(false));
             }
         }
 

@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Smart.Data Rules" Description="Smart.Data Rules" ToolsVersion="15.0">
   <IncludeAll Action="Warning" />
-  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
-  </Rules>
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed"></Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1101" Action="Hidden" />
     <Rule Id="SA1121" Action="Hidden" />
@@ -13,5 +12,7 @@
     <Rule Id="SA1633" Action="Hidden" />
     <Rule Id="SA1642" Action="Hidden" />
     <Rule Id="SA1652" Action="Hidden" />
+    <Rule Id="SA1600" Action="Hidden" />
+    <Rule Id="SA1202" Action="Hidden" />
   </Rules>
 </RuleSet>

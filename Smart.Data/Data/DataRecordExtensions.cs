@@ -1,8 +1,9 @@
-﻿namespace Smart.Data
+namespace Smart.Data
 {
     using System;
     using System.Data;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Justification = "Extensions")]
     public static class DataRecordExtensions
     {
         public static bool? GetNullableBoolean(this IDataRecord record, int i)
