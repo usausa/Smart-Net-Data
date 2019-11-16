@@ -19,6 +19,9 @@
       <group targetFramework="netstandard2.0">
         <dependency id="System.Data.Common" version="4.3.0" />
       </group>
+      <group targetFramework="netstandard2.1">
+        <dependency id="System.Data.Common" version="4.3.0" />
+      </group>
       <group targetFramework="net462">
       </group>
     </dependencies>
@@ -27,6 +30,8 @@
   <files>
     <!-- netstandard2.0 -->
     <file src="Smart.Data\bin\Release\netstandard2.0\Smart.Data.dll" target="lib\netstandard2.0" />
+    <!-- netstandard2.1 -->
+    <file src="Smart.Data\bin\Release\netstandard2.1\Smart.Data.dll" target="lib\netstandard2.1" />
     <!-- net462 -->
     <file src="Smart.Data\bin\Release\net462\Smart.Data.dll" target="lib\net462" />
   </files>

@@ -18,7 +18,9 @@
         <dependency id="Usa.Smart.Data" version="1.2.1" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="System.Data.Common" version="4.3.0" />
+        <dependency id="System.Data.SqlClient" version="4.7.0" />
+      </group>
+      <group targetFramework="netstandard2.1">
         <dependency id="System.Data.SqlClient" version="4.7.0" />
       </group>
       <group targetFramework="net462">
@@ -29,6 +31,8 @@
   <files>
     <!-- netstandard2.0 -->
     <file src="Smart.Data.SqlClient\bin\Release\netstandard2.0\Smart.Data.SqlClient.dll" target="lib\netstandard2.0" />
+    <!-- netstandard2.1 -->
+    <file src="Smart.Data.SqlClient\bin\Release\netstandard2.1\Smart.Data.SqlClient.dll" target="lib\netstandard2.1" />
     <!-- net462 -->
     <file src="Smart.Data.SqlClient\bin\Release\net462\Smart.Data.SqlClient.dll" target="lib\net462" />
   </files>
