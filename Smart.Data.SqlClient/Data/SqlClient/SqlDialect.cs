@@ -1,8 +1,9 @@
-﻿namespace Smart.Data.SqlClient
+namespace Smart.Data.SqlClient
 {
     using System.Data.Common;
-    using System.Data.SqlClient;
     using System.Text.RegularExpressions;
+
+    using Microsoft.Data.SqlClient;
 
     public sealed class SqlDialect : IDialect
     {
