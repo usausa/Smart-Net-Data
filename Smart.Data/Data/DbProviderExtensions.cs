@@ -58,7 +58,37 @@ namespace Smart.Data
             }
         }
 
+        public static async ValueTask UsingAsync(this IDbProvider factory, Func<DbConnection, ValueTask> func)
+        {
+            await using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                await func(con).ConfigureAwait(false);
+            }
+        }
+
+        public static async ValueTask<T> UsingAsync<T>(this IDbProvider factory, Func<DbConnection, ValueTask<T>> func)
+        {
+            await using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                return await func(con).ConfigureAwait(false);
+            }
+        }
+
         public static async IAsyncEnumerable<T> UsingDeferAsync<T>(this IDbProvider factory, Func<DbConnection, Task<IEnumerable<T>>> func)
+        {
+            await using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                foreach (var item in await func(con).ConfigureAwait(false))
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        public static async IAsyncEnumerable<T> UsingDeferAsync<T>(this IDbProvider factory, Func<DbConnection, ValueTask<IEnumerable<T>>> func)
         {
             await using (var con = factory.CreateConnection())
             {
@@ -153,7 +183,54 @@ namespace Smart.Data
                 }
             }
         }
-    }
+
+        public static async ValueTask UsingTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func)
+        {
+            await using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                await using (var tx = con.BeginTransaction())
+                {
+                    await func(con, tx).ConfigureAwait(false);
+                }
+            }
+        }
+
+        public static async ValueTask<T> UsingTxAsync<T>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<T>> func)
+        {
+            await using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                await using (var tx = con.BeginTransaction())
+                {
+                    return await func(con, tx).ConfigureAwait(false);
+                }
+            }
+        }
+
+        public static async ValueTask UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func)
+        {
+            await using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                await using (var tx = con.BeginTransaction(level))
+                {
+                    await func(con, tx).ConfigureAwait(false);
+                }
+            }
+        }
+
+        public static async ValueTask<T> UsingTxAsync<T>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<T>> func)
+        {
+            await using (var con = factory.CreateConnection())
+            {
+                con.Open();
+                await using (var tx = con.BeginTransaction(level))
+                {
+                    return await func(con, tx).ConfigureAwait(false);
+                }
+            }
+        }
 #else
         public static void Using(this IDbProvider factory, Action<DbConnection> action)
         {
@@ -274,6 +351,6 @@ namespace Smart.Data
                 }
             }
         }
-    }
 #endif
+    }
 }
