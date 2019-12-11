@@ -40,24 +40,6 @@ namespace Smart.Data
             }
         }
 
-        public static async Task UsingAsync(this IDbProvider factory, Func<DbConnection, Task> func)
-        {
-            await using (var con = factory.CreateConnection())
-            {
-                con.Open();
-                await func(con).ConfigureAwait(false);
-            }
-        }
-
-        public static async Task<T> UsingAsync<T>(this IDbProvider factory, Func<DbConnection, Task<T>> func)
-        {
-            await using (var con = factory.CreateConnection())
-            {
-                con.Open();
-                return await func(con).ConfigureAwait(false);
-            }
-        }
-
         public static async ValueTask UsingAsync(this IDbProvider factory, Func<DbConnection, ValueTask> func)
         {
             await using (var con = factory.CreateConnection())
@@ -73,18 +55,6 @@ namespace Smart.Data
             {
                 con.Open();
                 return await func(con).ConfigureAwait(false);
-            }
-        }
-
-        public static async IAsyncEnumerable<T> UsingDeferAsync<T>(this IDbProvider factory, Func<DbConnection, Task<IEnumerable<T>>> func)
-        {
-            await using (var con = factory.CreateConnection())
-            {
-                con.Open();
-                foreach (var item in await func(con).ConfigureAwait(false))
-                {
-                    yield return item;
-                }
             }
         }
 
@@ -132,54 +102,6 @@ namespace Smart.Data
                 using (var tx = con.BeginTransaction())
                 {
                     return func(con, tx);
-                }
-            }
-        }
-
-        public static async Task UsingTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, Task> func)
-        {
-            await using (var con = factory.CreateConnection())
-            {
-                con.Open();
-                await using (var tx = con.BeginTransaction())
-                {
-                    await func(con, tx).ConfigureAwait(false);
-                }
-            }
-        }
-
-        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, Func<DbConnection, DbTransaction, Task<T>> func)
-        {
-            await using (var con = factory.CreateConnection())
-            {
-                con.Open();
-                await using (var tx = con.BeginTransaction())
-                {
-                    return await func(con, tx).ConfigureAwait(false);
-                }
-            }
-        }
-
-        public static async Task UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, Task> func)
-        {
-            await using (var con = factory.CreateConnection())
-            {
-                con.Open();
-                await using (var tx = con.BeginTransaction(level))
-                {
-                    await func(con, tx).ConfigureAwait(false);
-                }
-            }
-        }
-
-        public static async Task<T> UsingTxAsync<T>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, Task<T>> func)
-        {
-            await using (var con = factory.CreateConnection())
-            {
-                con.Open();
-                await using (var tx = con.BeginTransaction(level))
-                {
-                    return await func(con, tx).ConfigureAwait(false);
                 }
             }
         }
