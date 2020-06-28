@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net462</TargetFrameworks>
@@ -6,7 +6,15 @@
     <RootNamespace>Smart</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net462' ">
+  <PropertyGroup>
+    <PackageId>Usa.Smart.Data</PackageId>
+    <Title>Smart.Data .NET</Title>
+    <Description>Smart data library for .NET</Description>
+    <Summary>Smart data library for .NET</Summary>
+    <PackageTags>smart ado.net</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net462' ">
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
   </ItemGroup>
 

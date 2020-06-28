@@ -13,10 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		README.md = README.md
-		Smart.Data.nuspec = Smart.Data.nuspec
 		Smart.Data.ruleset = Smart.Data.ruleset
 		Smart.Data.sln.DotSettings = Smart.Data.sln.DotSettings
-		Smart.Data.SqlClient.nuspec = Smart.Data.SqlClient.nuspec
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smart.Data.SqlClient", "Smart.Data.SqlClient\Smart.Data.SqlClient.csproj", "{89B5B593-9251-4C03-A046-3F7001F2474B}"
