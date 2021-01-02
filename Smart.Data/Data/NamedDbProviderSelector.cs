@@ -4,7 +4,7 @@ namespace Smart.Data
 
     public sealed class NamedDbProviderSelector : IDbProviderSelector
     {
-        private readonly Dictionary<string, IDbProvider> providers = new Dictionary<string, IDbProvider>();
+        private readonly Dictionary<string, IDbProvider> providers = new();
 
         public void AddProvider(string name, IDbProvider provider)
         {
