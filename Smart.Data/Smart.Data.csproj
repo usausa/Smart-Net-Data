@@ -14,7 +14,7 @@
     <PackageTags>smart ado.net</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net462' ">
+  <ItemGroup>
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
   </ItemGroup>
 
