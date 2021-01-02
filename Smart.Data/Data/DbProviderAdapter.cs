@@ -17,7 +17,7 @@ namespace Smart.Data
         public DbConnection CreateConnection()
         {
             var con = factory.CreateConnection();
-            con.ConnectionString = connectionString;
+            con!.ConnectionString = connectionString;
             return con;
         }
     }
