@@ -1,4 +1,4 @@
-namespace Smart.Data
+﻿namespace Smart.Data
 {
     using System;
     using System.Data;
@@ -28,7 +28,7 @@ namespace Smart.Data
 
         public static decimal? GetNullableDecimal(this IDataRecord record, int i)
         {
-            return record.IsDBNull(i) ? null : (Decimal?)record.GetDecimal(i);
+            return record.IsDBNull(i) ? null : (decimal?)record.GetDecimal(i);
         }
 
         public static double? GetNullableDouble(this IDataRecord record, int i)
