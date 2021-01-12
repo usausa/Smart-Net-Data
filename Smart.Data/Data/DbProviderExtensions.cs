@@ -1,4 +1,4 @@
-namespace Smart.Data
+﻿namespace Smart.Data
 {
     using System;
     using System.Collections.Generic;
@@ -231,7 +231,7 @@ namespace Smart.Data
             using (var con = factory.CreateConnection())
             {
                 await con.OpenAsync().ConfigureAwait(false);
-                using (var tx = con.BeginTransaction())
+                using (var tx = await con.BeginTransactionAsync().ConfigureAwait(false))
                 {
                     await func(con, tx).ConfigureAwait(false);
                 }
@@ -243,7 +243,7 @@ namespace Smart.Data
             using (var con = factory.CreateConnection())
             {
                 await con.OpenAsync().ConfigureAwait(false);
-                using (var tx = con.BeginTransaction())
+                using (var tx = await con.BeginTransactionAsync().ConfigureAwait(false))
                 {
                     return await func(con, tx).ConfigureAwait(false);
                 }
@@ -255,7 +255,7 @@ namespace Smart.Data
             using (var con = factory.CreateConnection())
             {
                 await con.OpenAsync().ConfigureAwait(false);
-                using (var tx = con.BeginTransaction(level))
+                using (var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false))
                 {
                     await func(con, tx).ConfigureAwait(false);
                 }
@@ -267,7 +267,7 @@ namespace Smart.Data
             using (var con = factory.CreateConnection())
             {
                 await con.OpenAsync().ConfigureAwait(false);
-                using (var tx = con.BeginTransaction(level))
+                using (var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false))
                 {
                     return await func(con, tx).ConfigureAwait(false);
                 }
