@@ -1,4 +1,4 @@
-﻿namespace Smart.Data
+namespace Smart.Data
 {
     using System;
     using System.Data;

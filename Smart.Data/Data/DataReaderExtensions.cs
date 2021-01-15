@@ -1,4 +1,4 @@
-﻿namespace Smart.Data
+namespace Smart.Data
 {
     using System.Collections.Generic;
     using System.Data;
