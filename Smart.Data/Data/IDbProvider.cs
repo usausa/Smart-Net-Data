@@ -1,9 +1,8 @@
-namespace Smart.Data
-{
-    using System.Data.Common;
+namespace Smart.Data;
 
-    public interface IDbProvider
-    {
-        DbConnection CreateConnection();
-    }
+using System.Data.Common;
+
+public interface IDbProvider
+{
+    DbConnection CreateConnection();
 }

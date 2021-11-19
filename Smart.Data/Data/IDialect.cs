@@ -1,11 +1,10 @@
-namespace Smart.Data
+namespace Smart.Data;
+
+using System.Data.Common;
+
+public interface IDialect
 {
-    using System.Data.Common;
+    bool IsDuplicate(DbException ex);
 
-    public interface IDialect
-    {
-        bool IsDuplicate(DbException ex);
-
-        string LikeEscape(string value);
-    }
+    string LikeEscape(string value);
 }

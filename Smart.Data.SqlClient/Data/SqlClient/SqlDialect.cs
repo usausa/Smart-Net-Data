@@ -1,20 +1,19 @@
-namespace Smart.Data.SqlClient
+namespace Smart.Data.SqlClient;
+
+using System.Data.Common;
+using System.Text.RegularExpressions;
+
+using Microsoft.Data.SqlClient;
+
+public sealed class SqlDialect : IDialect
 {
-    using System.Data.Common;
-    using System.Text.RegularExpressions;
-
-    using Microsoft.Data.SqlClient;
-
-    public sealed class SqlDialect : IDialect
+    public bool IsDuplicate(DbException ex)
     {
-        public bool IsDuplicate(DbException ex)
-        {
-            return (ex as SqlException)?.Number == 2627;
-        }
+        return (ex as SqlException)?.Number == 2627;
+    }
 
-        public string LikeEscape(string value)
-        {
-            return Regex.Replace(value, @"[%_\[]", "[$0]");
-        }
+    public string LikeEscape(string value)
+    {
+        return Regex.Replace(value, @"[%_\[]", "[$0]");
     }
 }

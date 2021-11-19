@@ -1,7 +1,6 @@
-namespace Smart.Data
+namespace Smart.Data;
+
+public interface IDbProviderSelector
 {
-    public interface IDbProviderSelector
-    {
-        IDbProvider GetProvider(object parameter);
-    }
+    IDbProvider GetProvider(object parameter);
 }

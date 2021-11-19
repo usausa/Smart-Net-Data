@@ -1,17 +1,16 @@
-namespace Smart.Data
+namespace Smart.Data;
+
+using System;
+using System.Data.Common;
+
+public sealed class DelegateDbProvider : IDbProvider
 {
-    using System;
-    using System.Data.Common;
+    private readonly Func<DbConnection> factory;
 
-    public sealed class DelegateDbProvider : IDbProvider
+    public DelegateDbProvider(Func<DbConnection> factory)
     {
-        private readonly Func<DbConnection> factory;
-
-        public DelegateDbProvider(Func<DbConnection> factory)
-        {
-            this.factory = factory;
-        }
-
-        public DbConnection CreateConnection() => factory();
+        this.factory = factory;
     }
+
+    public DbConnection CreateConnection() => factory();
 }
