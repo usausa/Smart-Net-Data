@@ -15,7 +15,6 @@ public static class DbConnectionExtensions
         }
     }
 
-#if NETSTANDARD2_1
     public static async ValueTask OpenIfNotAsync(this DbConnection con)
     {
         if ((con.State & ConnectionState.Open) != ConnectionState.Open)
@@ -23,13 +22,4 @@ public static class DbConnectionExtensions
             await con.OpenAsync().ConfigureAwait(false);
         }
     }
-#else
-    public static async Task OpenIfNotAsync(this DbConnection con)
-    {
-        if ((con.State & ConnectionState.Open) != ConnectionState.Open)
-        {
-            await con.OpenAsync().ConfigureAwait(false);
-        }
-    }
-#endif
 }
