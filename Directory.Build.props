@@ -4,7 +4,6 @@
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <Deterministic>true</Deterministic>
-    <NoWarn>$(NoWarn),1573,1591,1712</NoWarn>
     <MSBuildWarningsAsMessages>SA0001</MSBuildWarningsAsMessages>
     <WarningsAsErrors>nullable</WarningsAsErrors>
   </PropertyGroup>
@@ -39,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
