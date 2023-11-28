@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public sealed class NamedDbProviderSelector : IDbProviderSelector
 {
-    private readonly Dictionary<string, IDbProvider> providers = new();
+    private readonly Dictionary<string, IDbProvider> providers = [];
 
     public void AddProvider(string name, IDbProvider provider)
     {

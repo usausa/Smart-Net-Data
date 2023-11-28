@@ -10,7 +10,6 @@
     <PackageId>Usa.Smart.Data.SqlClient</PackageId>
     <Title>Smart.Data.SqlClient .NET</Title>
     <Description>Smart data library for SQL Server .NET</Description>
-    <Summary>Smart data library for SQL Server .NET</Summary>
     <PackageTags>smart ado.net</PackageTags>
   </PropertyGroup>
 

@@ -10,7 +10,6 @@
     <PackageId>Usa.Smart.Data</PackageId>
     <Title>Smart.Data .NET</Title>
     <Description>Smart data library for .NET</Description>
-    <Summary>Smart data library for .NET</Summary>
     <PackageTags>smart ado.net</PackageTags>
   </PropertyGroup>
 

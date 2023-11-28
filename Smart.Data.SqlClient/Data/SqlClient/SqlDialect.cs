@@ -9,7 +9,7 @@ public sealed class SqlDialect : IDialect
 {
     public bool IsDuplicate(DbException ex)
     {
-        return (ex as SqlException)?.Number == 2627;
+        return ex is SqlException { Number: 2627 };
     }
 
     public string LikeEscape(string value)
