@@ -6,7 +6,7 @@ using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Justification = "Extensions")]
+#pragma warning disable CA1062
 public static class DbProviderExtensions
 {
     public static void Using(this IDbProvider factory, Action<DbConnection> action)
@@ -139,3 +139,4 @@ public static class DbProviderExtensions
         return await func(con, tx).ConfigureAwait(false);
     }
 }
+#pragma warning restore CA1062

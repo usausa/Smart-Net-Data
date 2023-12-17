@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Justification = "Extensions")]
+#pragma warning disable CA1062
 public static class DbConnectionExtensions
 {
     public static void OpenIfNot(this IDbConnection con)
@@ -23,3 +23,4 @@ public static class DbConnectionExtensions
         }
     }
 }
+#pragma warning restore CA1062

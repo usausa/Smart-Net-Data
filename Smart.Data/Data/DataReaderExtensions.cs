@@ -3,7 +3,7 @@ namespace Smart.Data;
 using System.Collections.Generic;
 using System.Data;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Justification = "Extensions")]
+#pragma warning disable CA1062
 public static class DataReaderExtensions
 {
     public static IEnumerable<IDataRecord> AsEnumerable(this IDataReader reader)
@@ -14,3 +14,4 @@ public static class DataReaderExtensions
         }
     }
 }
+#pragma warning restore CA1062

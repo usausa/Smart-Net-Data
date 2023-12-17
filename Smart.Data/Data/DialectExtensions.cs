@@ -2,7 +2,7 @@ namespace Smart.Data;
 
 using System;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods", Justification = "Extensions")]
+#pragma warning disable CA1062
 public static class DialectExtensions
 {
     public static string? LikeStartWith(this IDialect dialect, string? value)
@@ -20,3 +20,4 @@ public static class DialectExtensions
         return String.IsNullOrEmpty(value) ? value : "%" + dialect.LikeEscape(value) + "%";
     }
 }
+#pragma warning restore CA1062
