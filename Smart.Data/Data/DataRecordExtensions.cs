@@ -48,7 +48,7 @@ public static class DataRecordExtensions
 
     public static short? GetNullableInt16(this IDataRecord record, int i)
     {
-        return record.IsDBNull(i) ? null : (short?)record.GetInt32(i);
+        return record.IsDBNull(i) ? null : record.GetInt16(i);
     }
 
     public static int? GetNullableInt32(this IDataRecord record, int i)
