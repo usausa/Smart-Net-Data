@@ -5,7 +5,6 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-#pragma warning disable CA1062
 public static class DbConnectionExtensions
 {
     public static void OpenIfNot(this IDbConnection con)
@@ -47,5 +46,16 @@ public static class DbConnectionExtensions
         await con.OpenIfNotAsync(cancellationToken).ConfigureAwait(false);
         return await con.BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
     }
+
+    public static DbBatch CreateBatchWithOpen(this DbConnection con)
+    {
+        con.OpenIfNot();
+        return con.CreateBatch();
+    }
+
+    public static async ValueTask<DbBatch> CreateBatchWithOpenAsync(this DbConnection con, CancellationToken cancellationToken = default)
+    {
+        await con.OpenIfNotAsync(cancellationToken).ConfigureAwait(false);
+        return con.CreateBatch();
+    }
 }
-#pragma warning restore CA1062
