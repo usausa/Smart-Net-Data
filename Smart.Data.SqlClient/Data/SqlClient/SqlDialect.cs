@@ -5,8 +5,11 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Data.SqlClient;
 
-public sealed class SqlDialect : IDialect
+public sealed partial class SqlDialect : IDialect
 {
+    [GeneratedRegex(@"[%_\[]")]
+    private static partial Regex LikeEscapeRegex();
+
     public bool IsDuplicate(DbException ex)
     {
         return ex is SqlException { Number: 2627 };
@@ -14,6 +17,6 @@ public sealed class SqlDialect : IDialect
 
     public string LikeEscape(string value)
     {
-        return Regex.Replace(value, @"[%_\[]", "[$0]");
+        return LikeEscapeRegex().Replace(value, "[$0]");
     }
 }
