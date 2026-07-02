@@ -12,7 +12,7 @@ public sealed partial class SqlDialect : IDialect
 
     public bool IsDuplicate(DbException ex)
     {
-        return ex is SqlException { Number: 2627 };
+        return ex is SqlException { Number: 2627 or 2601 };
     }
 
     public string LikeEscape(string value)

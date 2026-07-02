@@ -2,7 +2,7 @@ namespace Smart.Data;
 
 using System.Data.Common;
 
-public sealed class DbProviderAdapter
+public sealed class DbProviderAdapter : IDbProvider
 {
     private readonly DbProviderFactory factory;
 
@@ -18,6 +18,7 @@ public sealed class DbProviderAdapter
     {
         var con = factory.CreateConnection();
         con!.ConnectionString = connectionString;
+        con.ConnectionString = connectionString;
         return con;
     }
 }
