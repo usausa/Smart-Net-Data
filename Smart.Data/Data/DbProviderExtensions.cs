@@ -200,7 +200,7 @@ public static class DbProviderExtensions
         await using var con = factory.CreateConnection();
 #pragma warning restore CA2007
         await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await foreach (var item in func(con).ConfigureAwait(false))
+        await foreach (var item in func(con).WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }
@@ -224,7 +224,7 @@ public static class DbProviderExtensions
         await using var con = factory.CreateConnection();
 #pragma warning restore CA2007
         await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await foreach (var item in func(con, state).ConfigureAwait(false))
+        await foreach (var item in func(con, state).WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }

@@ -115,7 +115,7 @@ public static class DbDataSourceExtensions
 #pragma warning disable CA2007
         await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
 #pragma warning restore CA2007
-        await foreach (var item in func(con).ConfigureAwait(false))
+        await foreach (var item in func(con).WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }
@@ -126,7 +126,7 @@ public static class DbDataSourceExtensions
 #pragma warning disable CA2007
         await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
 #pragma warning restore CA2007
-        await foreach (var item in func(con, state).ConfigureAwait(false))
+        await foreach (var item in func(con, state).WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return item;
         }
