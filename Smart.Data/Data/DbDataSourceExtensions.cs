@@ -95,6 +95,7 @@ public static class DbDataSourceExtensions
 #pragma warning restore CA2007
         foreach (var item in await func(con).ConfigureAwait(false))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             yield return item;
         }
     }
@@ -106,6 +107,7 @@ public static class DbDataSourceExtensions
 #pragma warning restore CA2007
         foreach (var item in await func(con, state).ConfigureAwait(false))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             yield return item;
         }
     }
