@@ -1,5 +1,6 @@
 namespace Smart.Data;
 
+using System;
 using System.Data.Common;
 
 public sealed class DbProviderAdapter : IDbProvider
@@ -17,7 +18,11 @@ public sealed class DbProviderAdapter : IDbProvider
     public DbConnection CreateConnection()
     {
         var con = factory.CreateConnection();
-        con!.ConnectionString = connectionString;
+        if (con is null)
+        {
+            throw new InvalidOperationException("DbProviderFactory returned a null connection.");
+        }
+
         con.ConnectionString = connectionString;
         return con;
     }

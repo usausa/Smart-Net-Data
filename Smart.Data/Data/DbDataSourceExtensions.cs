@@ -7,7 +7,6 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-#pragma warning disable CA1062
 public static class DbDataSourceExtensions
 {
     // ------------------------------------------------------------
@@ -15,597 +14,208 @@ public static class DbDataSourceExtensions
     // ------------------------------------------------------------
 
     public static void Using(this DbDataSource dataSource, Action<DbConnection> action)
-    {
-        using var con = dataSource.OpenConnection();
-        action(con);
-    }
+        => ConnectionOperations.Using(new DataSourceConnectionSource(dataSource), action);
 
     public static void Using<TState>(this DbDataSource dataSource, TState state, Action<DbConnection, TState> action)
-    {
-        using var con = dataSource.OpenConnection();
-        action(con, state);
-    }
+        => ConnectionOperations.Using(new DataSourceConnectionSource(dataSource), state, action);
 
     public static TResult Using<TResult>(this DbDataSource dataSource, Func<DbConnection, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        return func(con);
-    }
+        => ConnectionOperations.Using(new DataSourceConnectionSource(dataSource), func);
 
     public static TResult Using<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        return func(con, state);
-    }
+        => ConnectionOperations.Using(new DataSourceConnectionSource(dataSource), state, func);
 
     public static IEnumerable<TResult> UsingDefer<TResult>(this DbDataSource dataSource, Func<DbConnection, IEnumerable<TResult>> func)
-    {
-        using var con = dataSource.OpenConnection();
-        foreach (var item in func(con))
-        {
-            yield return item;
-        }
-    }
+        => ConnectionOperations.UsingDefer(new DataSourceConnectionSource(dataSource), func);
 
     public static IEnumerable<TResult> UsingDefer<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, IEnumerable<TResult>> func)
-    {
-        using var con = dataSource.OpenConnection();
-        foreach (var item in func(con, state))
-        {
-            yield return item;
-        }
-    }
+        => ConnectionOperations.UsingDefer(new DataSourceConnectionSource(dataSource), state, func);
 
-    public static async ValueTask UsingAsync(this DbDataSource dataSource, Func<DbConnection, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAsync(this DbDataSource dataSource, Func<DbConnection, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask UsingAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, ValueTask<IEnumerable<TResult>>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        foreach (var item in await func(con).ConfigureAwait(false))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, ValueTask<IEnumerable<TResult>>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingDeferAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, ValueTask<IEnumerable<TResult>>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        foreach (var item in await func(con, state).ConfigureAwait(false))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, ValueTask<IEnumerable<TResult>>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingDeferAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, IAsyncEnumerable<TResult>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await foreach (var item in func(con).WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, IAsyncEnumerable<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingDeferAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, IAsyncEnumerable<TResult>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await foreach (var item in func(con, state).WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, TState, IAsyncEnumerable<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingDeferAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Using + Transaction
     // ------------------------------------------------------------
 
     public static void UsingTx(this DbDataSource dataSource, Action<DbConnection, DbTransaction> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        action(con, tx);
-    }
+        => ConnectionOperations.UsingTx(new DataSourceConnectionSource(dataSource), action);
 
     public static void UsingTx<TState>(this DbDataSource dataSource, TState state, Action<DbConnection, DbTransaction, TState> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        action(con, tx, state);
-    }
+        => ConnectionOperations.UsingTx(new DataSourceConnectionSource(dataSource), state, action);
 
     public static TResult UsingTx<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        return func(con, tx);
-    }
+        => ConnectionOperations.UsingTx(new DataSourceConnectionSource(dataSource), func);
 
     public static TResult UsingTx<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        return func(con, tx, state);
-    }
+        => ConnectionOperations.UsingTx(new DataSourceConnectionSource(dataSource), state, func);
 
-    public static async ValueTask UsingTxAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask UsingTxAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask UsingTxAsync(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), level, func, cancellationToken);
 
-    public static async ValueTask UsingTxAsync<TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync<TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), level, state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult>(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult>(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), level, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult, TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult, TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxAsync(new DataSourceConnectionSource(dataSource), level, state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // using + Auto-commit Transaction
     // ------------------------------------------------------------
 
     public static void UsingAutoTx(this DbDataSource dataSource, Action<DbConnection, DbTransaction> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        action(con, tx);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTx(new DataSourceConnectionSource(dataSource), action);
 
     public static void UsingAutoTx<TState>(this DbDataSource dataSource, TState state, Action<DbConnection, DbTransaction, TState> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        action(con, tx, state);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTx(new DataSourceConnectionSource(dataSource), state, action);
 
     public static TResult UsingAutoTx<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        var result = func(con, tx);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTx(new DataSourceConnectionSource(dataSource), func);
 
     public static TResult UsingAutoTx<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        var result = func(con, tx, state);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTx(new DataSourceConnectionSource(dataSource), state, func);
 
-    public static async ValueTask UsingAutoTxAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxAsync(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), level, func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxAsync<TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync<TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), level, state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult>(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult>(this DbDataSource dataSource, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), level, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this DbDataSource dataSource, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxAsync(new DataSourceConnectionSource(dataSource), level, state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Batch
     // ------------------------------------------------------------
 
     public static void UsingBatch(this DbDataSource dataSource, Action<DbConnection, DbBatch> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var batch = con.CreateBatch();
-        action(con, batch);
-    }
+        => ConnectionOperations.UsingBatch(new DataSourceConnectionSource(dataSource), action);
 
     public static void UsingBatch<TState>(this DbDataSource dataSource, TState state, Action<DbConnection, DbBatch, TState> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var batch = con.CreateBatch();
-        action(con, batch, state);
-    }
+        => ConnectionOperations.UsingBatch(new DataSourceConnectionSource(dataSource), state, action);
 
     public static TResult UsingBatch<TResult>(this DbDataSource dataSource, Func<DbConnection, DbBatch, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var batch = con.CreateBatch();
-        return func(con, batch);
-    }
+        => ConnectionOperations.UsingBatch(new DataSourceConnectionSource(dataSource), func);
 
     public static TResult UsingBatch<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbBatch, TState, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var batch = con.CreateBatch();
-        return func(con, batch, state);
-    }
+        => ConnectionOperations.UsingBatch(new DataSourceConnectionSource(dataSource), state, func);
 
-    public static async ValueTask UsingBatchAsync(this DbDataSource dataSource, Func<DbConnection, DbBatch, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        await func(con, batch).ConfigureAwait(false);
-    }
+    public static ValueTask UsingBatchAsync(this DbDataSource dataSource, Func<DbConnection, DbBatch, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingBatchAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask UsingBatchAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        await func(con, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingBatchAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingBatchAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingBatchAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        return await func(con, batch).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingBatchAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingBatchAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingBatchAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        return await func(con, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingBatchAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingBatchAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Batch + Transaction
     // ------------------------------------------------------------
 
     public static void UsingTxBatch(this DbDataSource dataSource, Action<DbConnection, DbTransaction, DbBatch> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch);
-    }
+        => ConnectionOperations.UsingTxBatch(new DataSourceConnectionSource(dataSource), action);
 
     public static void UsingTxBatch<TState>(this DbDataSource dataSource, TState state, Action<DbConnection, DbTransaction, DbBatch, TState> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch, state);
-    }
+        => ConnectionOperations.UsingTxBatch(new DataSourceConnectionSource(dataSource), state, action);
 
     public static TResult UsingTxBatch<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        return func(con, tx, batch);
-    }
+        => ConnectionOperations.UsingTxBatch(new DataSourceConnectionSource(dataSource), func);
 
     public static TResult UsingTxBatch<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        return func(con, tx, batch, state);
-    }
+        => ConnectionOperations.UsingTxBatch(new DataSourceConnectionSource(dataSource), state, func);
 
-    public static async ValueTask UsingTxBatchAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxBatchAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxBatchAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask UsingTxBatchAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxBatchAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxBatchAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxBatchAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        return await func(con, tx, batch).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxBatchAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxBatchAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxBatchAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        return await func(con, tx, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxBatchAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingTxBatchAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Batch + Auto-commit Transaction
     // ------------------------------------------------------------
 
     public static void UsingAutoTxBatch(this DbDataSource dataSource, Action<DbConnection, DbTransaction, DbBatch> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new DataSourceConnectionSource(dataSource), action);
 
     public static void UsingAutoTxBatch<TState>(this DbDataSource dataSource, TState state, Action<DbConnection, DbTransaction, DbBatch, TState> action)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch, state);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new DataSourceConnectionSource(dataSource), state, action);
 
     public static TResult UsingAutoTxBatch<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        var result = func(con, tx, batch);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new DataSourceConnectionSource(dataSource), func);
 
     public static TResult UsingAutoTxBatch<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, TResult> func)
-    {
-        using var con = dataSource.OpenConnection();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        var result = func(con, tx, batch, state);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new DataSourceConnectionSource(dataSource), state, func);
 
-    public static async ValueTask UsingAutoTxBatchAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxBatchAsync(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxBatchAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxBatchAsync<TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxBatchAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        var result = await func(con, tx, batch).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxBatchAsync<TResult>(this DbDataSource dataSource, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new DataSourceConnectionSource(dataSource), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxBatchAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
-    {
-#pragma warning disable CA2007
-        await using var con = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        var result = await func(con, tx, batch, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxBatchAsync<TResult, TState>(this DbDataSource dataSource, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken = default)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new DataSourceConnectionSource(dataSource), state, func, cancellationToken);
 }
-#pragma warning restore CA1062

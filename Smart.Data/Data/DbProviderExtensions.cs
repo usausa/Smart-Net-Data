@@ -7,7 +7,6 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-#pragma warning disable CA1062
 public static class DbProviderExtensions
 {
     // ------------------------------------------------------------
@@ -15,1169 +14,316 @@ public static class DbProviderExtensions
     // ------------------------------------------------------------
 
     public static void Using(this IDbProvider factory, Action<DbConnection> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        action(con);
-    }
+        => ConnectionOperations.Using(new ProviderConnectionSource(factory), action);
 
     public static void Using<TState>(this IDbProvider factory, TState state, Action<DbConnection, TState> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        action(con, state);
-    }
+        => ConnectionOperations.Using(new ProviderConnectionSource(factory), state, action);
 
     public static TResult Using<TResult>(this IDbProvider factory, Func<DbConnection, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        return func(con);
-    }
+        => ConnectionOperations.Using(new ProviderConnectionSource(factory), func);
 
     public static TResult Using<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        return func(con, state);
-    }
+        => ConnectionOperations.Using(new ProviderConnectionSource(factory), state, func);
 
     public static IEnumerable<TResult> UsingDefer<TResult>(this IDbProvider factory, Func<DbConnection, IEnumerable<TResult>> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        foreach (var item in func(con))
-        {
-            yield return item;
-        }
-    }
+        => ConnectionOperations.UsingDefer(new ProviderConnectionSource(factory), func);
 
     public static IEnumerable<TResult> UsingDefer<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, IEnumerable<TResult>> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        foreach (var item in func(con, state))
-        {
-            yield return item;
-        }
-    }
+        => ConnectionOperations.UsingDefer(new ProviderConnectionSource(factory), state, func);
 
-    public static async ValueTask UsingAsync(this IDbProvider factory, Func<DbConnection, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        await func(con).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAsync(this IDbProvider factory, Func<DbConnection, ValueTask> func)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask UsingAsync(this IDbProvider factory, Func<DbConnection, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await func(con).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAsync(this IDbProvider factory, Func<DbConnection, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask UsingAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        await func(con, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask> func)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask UsingAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await func(con, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        return await func(con).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask<TResult> UsingAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        return await func(con).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        return await func(con, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask<TResult> UsingAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        return await func(con, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<IEnumerable<TResult>>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        foreach (var item in await func(con).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<IEnumerable<TResult>>> func)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<IEnumerable<TResult>>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        foreach (var item in await func(con).ConfigureAwait(false))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, ValueTask<IEnumerable<TResult>>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<IEnumerable<TResult>>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        foreach (var item in await func(con, state).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<IEnumerable<TResult>>> func)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<IEnumerable<TResult>>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        foreach (var item in await func(con, state).ConfigureAwait(false))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, ValueTask<IEnumerable<TResult>>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, IAsyncEnumerable<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        await foreach (var item in func(con).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, IAsyncEnumerable<TResult>> func)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, IAsyncEnumerable<TResult>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await foreach (var item in func(con).WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult>(this IDbProvider factory, Func<DbConnection, IAsyncEnumerable<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, IAsyncEnumerable<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-        await foreach (var item in func(con, state).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, IAsyncEnumerable<TResult>> func)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, IAsyncEnumerable<TResult>> func, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-        await foreach (var item in func(con, state).WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return item;
-        }
-    }
+    public static IAsyncEnumerable<TResult> UsingDeferAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, TState, IAsyncEnumerable<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingDeferAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Using + Transaction
     // ------------------------------------------------------------
 
     public static void UsingTx(this IDbProvider factory, Action<DbConnection, DbTransaction> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        action(con, tx);
-    }
+        => ConnectionOperations.UsingTx(new ProviderConnectionSource(factory), action);
 
     public static void UsingTx<TState>(this IDbProvider factory, TState state, Action<DbConnection, DbTransaction, TState> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        action(con, tx, state);
-    }
+        => ConnectionOperations.UsingTx(new ProviderConnectionSource(factory), state, action);
 
     public static TResult UsingTx<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        return func(con, tx);
-    }
+        => ConnectionOperations.UsingTx(new ProviderConnectionSource(factory), func);
 
     public static TResult UsingTx<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        return func(con, tx, state);
-    }
+        => ConnectionOperations.UsingTx(new ProviderConnectionSource(factory), state, func);
 
-    public static async ValueTask UsingTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask UsingTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask UsingTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask UsingTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, func, default);
 
-    public static async ValueTask UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, func, cancellationToken);
 
-    public static async ValueTask UsingTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, state, func, default);
 
-    public static async ValueTask UsingTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, func, default);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, state, func, default);
 
-    public static async ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        return await func(con, tx, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxAsync(new ProviderConnectionSource(factory), level, state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Using + Auto-commit Transaction
     // ------------------------------------------------------------
 
     public static void UsingAutoTx(this IDbProvider factory, Action<DbConnection, DbTransaction> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        action(con, tx);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTx(new ProviderConnectionSource(factory), action);
 
     public static void UsingAutoTx<TState>(this IDbProvider factory, TState state, Action<DbConnection, DbTransaction, TState> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        action(con, tx, state);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTx(new ProviderConnectionSource(factory), state, action);
 
     public static TResult UsingAutoTx<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        var result = func(con, tx);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTx(new ProviderConnectionSource(factory), func);
 
     public static TResult UsingAutoTx<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        var result = func(con, tx, state);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTx(new ProviderConnectionSource(factory), state, func);
 
-    public static async ValueTask UsingAutoTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask UsingAutoTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, func, default);
 
-    public static async ValueTask UsingAutoTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, state, func, default);
 
-    public static async ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxAsync<TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, func, default);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult>(this IDbProvider factory, IsolationLevel level, Func<DbConnection, DbTransaction, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, state, func, default);
 
-    public static async ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(level, cancellationToken).ConfigureAwait(false);
-#pragma warning restore CA2007
-        var result = await func(con, tx, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxAsync<TResult, TState>(this IDbProvider factory, IsolationLevel level, TState state, Func<DbConnection, DbTransaction, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxAsync(new ProviderConnectionSource(factory), level, state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Batch
     // ------------------------------------------------------------
 
     public static void UsingBatch(this IDbProvider factory, Action<DbConnection, DbBatch> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var batch = con.CreateBatch();
-        action(con, batch);
-    }
+        => ConnectionOperations.UsingBatch(new ProviderConnectionSource(factory), action);
 
     public static void UsingBatch<TState>(this IDbProvider factory, TState state, Action<DbConnection, DbBatch, TState> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var batch = con.CreateBatch();
-        action(con, batch, state);
-    }
+        => ConnectionOperations.UsingBatch(new ProviderConnectionSource(factory), state, action);
 
     public static TResult UsingBatch<TResult>(this IDbProvider factory, Func<DbConnection, DbBatch, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var batch = con.CreateBatch();
-        return func(con, batch);
-    }
+        => ConnectionOperations.UsingBatch(new ProviderConnectionSource(factory), func);
 
     public static TResult UsingBatch<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var batch = con.CreateBatch();
-        return func(con, batch, state);
-    }
+        => ConnectionOperations.UsingBatch(new ProviderConnectionSource(factory), state, func);
 
-    public static async ValueTask UsingBatchAsync(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        await func(con, batch).ConfigureAwait(false);
-    }
+    public static ValueTask UsingBatchAsync(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask> func)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask UsingBatchAsync(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        await func(con, batch).ConfigureAwait(false);
-    }
+    public static ValueTask UsingBatchAsync(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask UsingBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        await func(con, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask> func)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask UsingBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        await func(con, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        return await func(con, batch).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask<TResult> UsingBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        return await func(con, batch).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        return await func(con, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask<TResult> UsingBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        return await func(con, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingBatchAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Batch + Transaction
     // ------------------------------------------------------------
 
     public static void UsingTxBatch(this IDbProvider factory, Action<DbConnection, DbTransaction, DbBatch> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch);
-    }
+        => ConnectionOperations.UsingTxBatch(new ProviderConnectionSource(factory), action);
 
     public static void UsingTxBatch<TState>(this IDbProvider factory, TState state, Action<DbConnection, DbTransaction, DbBatch, TState> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch, state);
-    }
+        => ConnectionOperations.UsingTxBatch(new ProviderConnectionSource(factory), state, action);
 
     public static TResult UsingTxBatch<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        return func(con, tx, batch);
-    }
+        => ConnectionOperations.UsingTxBatch(new ProviderConnectionSource(factory), func);
 
     public static TResult UsingTxBatch<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        return func(con, tx, batch, state);
-    }
+        => ConnectionOperations.UsingTxBatch(new ProviderConnectionSource(factory), state, func);
 
-    public static async ValueTask UsingTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask UsingTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask UsingTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask UsingTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask UsingTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        return await func(con, tx, batch).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask<TResult> UsingTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        return await func(con, tx, batch).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        return await func(con, tx, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask<TResult> UsingTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        return await func(con, tx, batch, state).ConfigureAwait(false);
-    }
+    public static ValueTask<TResult> UsingTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingTxBatchAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
     // ------------------------------------------------------------
     // Batch + Auto-commit Transaction
     // ------------------------------------------------------------
 
     public static void UsingAutoTxBatch(this IDbProvider factory, Action<DbConnection, DbTransaction, DbBatch> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new ProviderConnectionSource(factory), action);
 
     public static void UsingAutoTxBatch<TState>(this IDbProvider factory, TState state, Action<DbConnection, DbTransaction, DbBatch, TState> action)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        action(con, tx, batch, state);
-        tx.Commit();
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new ProviderConnectionSource(factory), state, action);
 
     public static TResult UsingAutoTxBatch<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        var result = func(con, tx, batch);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new ProviderConnectionSource(factory), func);
 
     public static TResult UsingAutoTxBatch<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, TResult> func)
-    {
-        using var con = factory.CreateConnection();
-        con.Open();
-        using var tx = con.BeginTransaction();
-        using var batch = con.CreateBatch();
-        batch.Transaction = tx;
-        var result = func(con, tx, batch, state);
-        tx.Commit();
-        return result;
-    }
+        => ConnectionOperations.UsingAutoTxBatch(new ProviderConnectionSource(factory), state, func);
 
-    public static async ValueTask UsingAutoTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask UsingAutoTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxBatchAsync(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask UsingAutoTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch, state).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask UsingAutoTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        await func(con, tx, batch, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-    }
+    public static ValueTask UsingAutoTxBatchAsync<TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        var result = await func(con, tx, batch).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), func, default);
 
-    public static async ValueTask<TResult> UsingAutoTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        var result = await func(con, tx, batch).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxBatchAsync<TResult>(this IDbProvider factory, Func<DbConnection, DbTransaction, DbBatch, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), func, cancellationToken);
 
-    public static async ValueTask<TResult> UsingAutoTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync().ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync().ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        var result = await func(con, tx, batch, state).ConfigureAwait(false);
-        await tx.CommitAsync().ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), state, func, default);
 
-    public static async ValueTask<TResult> UsingAutoTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
-    {
-#pragma warning disable CA2007
-        await using var con = factory.CreateConnection();
-#pragma warning restore CA2007
-        await con.OpenAsync(cancellationToken).ConfigureAwait(false);
-#pragma warning disable CA2007
-        await using var tx = await con.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-        await using var batch = con.CreateBatch();
-#pragma warning restore CA2007
-        batch.Transaction = tx;
-        var result = await func(con, tx, batch, state).ConfigureAwait(false);
-        await tx.CommitAsync(cancellationToken).ConfigureAwait(false);
-        return result;
-    }
+    public static ValueTask<TResult> UsingAutoTxBatchAsync<TResult, TState>(this IDbProvider factory, TState state, Func<DbConnection, DbTransaction, DbBatch, TState, ValueTask<TResult>> func, CancellationToken cancellationToken)
+        => ConnectionOperations.UsingAutoTxBatchAsync(new ProviderConnectionSource(factory), state, func, cancellationToken);
 }
-#pragma warning restore CA1062
