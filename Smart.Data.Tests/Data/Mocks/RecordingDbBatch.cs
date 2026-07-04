@@ -6,6 +6,8 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
+// ReSharper disable ConvertToAutoProperty
+// ReSharper disable ReplaceWithFieldKeyword
 internal sealed class RecordingDbBatch : DbBatch
 {
     private readonly Recorder recorder;
@@ -50,15 +52,15 @@ internal sealed class RecordingDbBatch : DbBatch
 
     public override int ExecuteNonQuery() => throw new NotSupportedException();
 
-    public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+    public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
-    public override object? ExecuteScalar() => throw new NotSupportedException();
+    public override object ExecuteScalar() => throw new NotSupportedException();
 
-    public override Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+    public override Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
     public override void Prepare() => throw new NotSupportedException();
 
-    public override Task PrepareAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+    public override Task PrepareAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
     public override void Dispose()
     {
@@ -77,3 +79,5 @@ internal sealed class RecordingDbBatch : DbBatch
 
     protected override Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken) => throw new NotSupportedException();
 }
+// ReSharper restore ReplaceWithFieldKeyword
+// ReSharper restore ConvertToAutoProperty

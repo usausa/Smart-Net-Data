@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
+// ReSharper disable ReplaceWithFieldKeyword
 internal sealed class RecordingDbConnection : DbConnection
 {
     private readonly Recorder recorder;
@@ -124,3 +125,4 @@ internal sealed class RecordingDbConnection : DbConnection
         }
     }
 }
+// ReSharper restore ReplaceWithFieldKeyword

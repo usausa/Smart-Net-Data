@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
+// ReSharper disable ConvertToAutoProperty
 internal sealed class RecordingDbTransaction : DbTransaction
 {
     private readonly DbConnection connection;
@@ -26,7 +27,7 @@ internal sealed class RecordingDbTransaction : DbTransaction
 
     public override IsolationLevel IsolationLevel => isolationLevel;
 
-    protected override DbConnection? DbConnection => connection;
+    protected override DbConnection DbConnection => connection;
 
     public override void Commit()
     {
@@ -40,7 +41,7 @@ internal sealed class RecordingDbTransaction : DbTransaction
         completed = true;
     }
 
-    public override Task CommitAsync(CancellationToken cancellationToken)
+    public override Task CommitAsync(CancellationToken cancellationToken = default)
     {
         recorder.Commit++;
         recorder.CommitToken = cancellationToken;
@@ -48,7 +49,7 @@ internal sealed class RecordingDbTransaction : DbTransaction
         return Task.CompletedTask;
     }
 
-    public override Task RollbackAsync(CancellationToken cancellationToken)
+    public override Task RollbackAsync(CancellationToken cancellationToken = default)
     {
         recorder.Rollback++;
         completed = true;
@@ -71,3 +72,4 @@ internal sealed class RecordingDbTransaction : DbTransaction
         base.Dispose(disposing);
     }
 }
+// ReSharper restore ConvertToAutoProperty
