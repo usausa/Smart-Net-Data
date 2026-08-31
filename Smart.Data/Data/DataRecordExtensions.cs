@@ -3,7 +3,6 @@ namespace Smart.Data;
 using System;
 using System.Data;
 
-#pragma warning disable CA1062
 public static class DataRecordExtensions
 {
     public static bool? GetNullableBoolean(this IDataRecord record, int i)
@@ -61,4 +60,3 @@ public static class DataRecordExtensions
         return record.IsDBNull(i) ? null : record.GetInt64(i);
     }
 }
-#pragma warning restore CA1062

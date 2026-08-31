@@ -3,7 +3,6 @@ namespace Smart.Data;
 using System.Collections.Generic;
 using System.Data;
 
-#pragma warning disable CA1062
 public static class DataReaderExtensions
 {
     public static IEnumerable<IDataRecord> AsEnumerable(this IDataReader reader)
@@ -14,4 +13,3 @@ public static class DataReaderExtensions
         }
     }
 }
-#pragma warning restore CA1062
