@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 using Smart.Data.Mocks;
 
-public sealed class DbDataSourceExtensionsTest
+public sealed class DbDataSourceExtensionsTests
 {
     //--------------------------------------------------------------------------------
     // Using

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 using Smart.Data.Mocks;
 
-public sealed class DbProviderExtensionsTest
+public sealed class DbProviderExtensionsTests
 {
     private static readonly int[] DeferItems = [1, 2, 3];
 

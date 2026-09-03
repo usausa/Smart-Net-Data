@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using Smart.Data.Mocks;
 
-public sealed class CommitAndResultVariantsTest
+public sealed class CommitAndResultVariantsTests
 {
     //--------------------------------------------------------------------------------
     // Provider: result / state flow
